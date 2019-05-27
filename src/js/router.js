@@ -4,15 +4,15 @@ import peopleController from './controllers/peopleController'
 import savedController from './controllers/savedController'
 import contactController from './controllers/contactController'
 
-crossroads.addRoute('#/', function() {
+crossroads.addRoute('/', function() {
   console.log('triggered home route')
   $('#app').load('/partials/_home.html', homeController)
 });
 
-crossroads.addRoute('/', function() {
+crossroads.addRoute('/#/', function() {
   console.log('triggered home route')
   $('#app').load('/partials/_home.html', homeController)
-})
+});
 
 crossroads.addRoute('#/people', function() {
   console.log('triggered people route')

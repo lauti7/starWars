@@ -3,11 +3,11 @@ import {initialStorage, getCharacters, save, saveCharactersEdited} from '../util
 import Character from '../utils/newCharacter';
 
 var base_url = 'https://swapi.co/api/people/';
-var nxtPage = localStorage.getItem('nxtpage');
+var nxtPage;
 console.log(nxtPage);
 
-
 var countCharacters = 0;
+
 
 function peopleController() {
   countCharacters = 0;
@@ -21,24 +21,79 @@ function peopleController() {
 }
 
 function handleRequest(characters){
+  showCharacters(characters.results);
   var fetchedCharacters = [];
   for (var i = 0; i < characters.results.length; i++) {
-    var character = new Character(characters.results[i].name, characters.results[i].gender, characters.results[i].eye_color, characters.results[i].height, characters.results[i].mass);
+    var character = new Character(countCharacters,characters.results[i].name, characters.results[i].gender, characters.results[i].eye_color, characters.results[i].height, characters.results[i].mass);
     fetchedCharacters.push(character);
   }
-  showCharacters(characters.results);
   save('allCharacters', fetchedCharacters);
   if (characters.next) {
-    localStorage.setItem('nxtpage', characters.next);
+    nxtPage = characters.next;
+    localStorage.setItem('nxtpage',nxtPage);
+    console.log(nxtPage);
+  } else {
+    nxtPage = null;
+    localStorage.setItem('nxtpage', nxtPage);
+    console.log(nxtPage);
+    $('#load-more').attr('disabled', true);
   }
 }
+
+//Event delegation
+$('.container').on('click', '#load-more', handleLoadMoreButton);
+$('.container').on('click', '.btn-success', handleSaveButton);
+$('.container').on('click', '.btn-warning', handleRemoveButton);
+
+function handleSaveButton(evt){
+  var $btn = $(evt.target);
+  var id = $btn.parent().parent().attr('id');
+  var allCharacters = getCharacters('allCharacters');
+  allCharacters[id].saved = true;
+  saveCharactersEdited(allCharacters);
+  $btn.removeClass('btn-success');
+  $btn.addClass('btn-warning');
+  $btn.text('Remover');
+  // for (var i = 0; i < allCharacters.length; i++) {
+  //   if (allCharacters[i].name === characterToSave.name) {
+  //     console.log('found');
+  //     allCharacters[i].saved = true;
+  //     saveCharactersEdited(allCharacters);
+  //     break;
+  //   }
+  //}
+}
+
+function handleRemoveButton(evt){
+  var $btn = $(evt.target);
+  var id = $btn.parent().parent().attr('id');
+  var allCharacters = getCharacters('allCharacters');
+  allCharacters[id - 1].saved = false;
+  saveCharactersEdited(allCharacters);
+  $btn.removeClass('btn-warning');
+  $btn.addClass('btn-success');
+  $btn.text('Guardar');
+  // for (var i = 0; i < allCharacters.length; i++) {
+  //   if (allCharacters[i].name === characterToSave.name) {
+  //     console.log('found');
+  //     allCharacters[i].saved = false;
+  //     saveCharactersEdited(allCharacters);
+  //     break;
+  //   }
+  // }
+}
+
+function handleLoadMoreButton(){
+  getData(nxtPage, handleRequest);
+}
+
 
 function showCharacters(characters){
   for (var i = 0; i < characters.length; i++) {
     countCharacters++;
-    var tr = `<tr id=${i}>
+    var tr = `<tr id=${countCharacters}>
       <th scope="row">${countCharacters}</th>
-      <td>${characters[i].name}</td>
+      <td>${characters[i].name.toLowerCase()}</td>
       <td>${translateGender(characters[i].gender)}</td>
       <td>${translateEyeColor(characters[i].eye_color)}</td>
       <td>${translateHeight(characters[i].height)}</td>
@@ -47,53 +102,9 @@ function showCharacters(characters){
       </tr>`;
     $('.tBody').append(tr);
   }
-  $('.btn-success').on('click', function(evt){
-    var $btn = $(evt.target);
-    $btn.removeClass('btn-success');
-    $btn.addClass('btn-warning');
-    $btn.text('Remover')
-    var id = $btn.parent().parent().attr('id');
-    var characterToSave = characters[id];
-    var allCharacters = getCharacters('allCharacters');
-    for (var i = 0; i < allCharacters.length; i++) {
-      if (allCharacters[i].name === characterToSave.name) {
-        console.log('found');
-        allCharacters[i].saved = true;
-        saveCharactersEdited(allCharacters);
-        break;
-      }
-    }
-    console.log('edited');
-  });
-  $('.btn-warning').on('click', function(evt){
-    var $btn = $(evt.target);
-    $btn.removeClass('btn-warning');
-    $btn.addClass('btn-success');
-    $btn.text('Guardar')
-    var id = $btn.parent().parent().attr('id');
-    var characterToSave = characters[id];
-    var allCharacters = getCharacters('allCharacters');
-    for (var i = 0; i < allCharacters.length; i++) {
-      if (allCharacters[i].name === characterToSave.name) {
-        console.log('found');
-        allCharacters[i].saved = false;
-        saveCharactersEdited(allCharacters);
-        break;
-      }
-    }
-    console.log('edited');
-  });
-
 }
 
 
-
-//Event delegation
-$('.container').on('click', '#load-more', function(evt){
-  console.log('clickeaste');
-  console.log(nxtPage);
-  getData(nxtPage, handleRequest);
-});
 
 function translateGender(gender) {
   if (gender === 'male') {
@@ -137,9 +148,10 @@ function translateMass(mass) {
 
 function translateHeight(height) {
   if (height === 'unknown') {
-    return '?? Cm'
+    return '?? M'
   } else {
-    return height + ' Cm'
+    var fromCmToM = height / 100;
+    return fromCmToM + ' M'
   }
 }
 

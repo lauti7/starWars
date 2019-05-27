@@ -1,5 +1,6 @@
 //Funcion constructora para los personajes, solo datos que sirven.
-function Character(name, gender, eyeColor, height, mass){
+function Character(id, name, gender, eyeColor, height, mass){
+  this.id = id,
   this.name = name,
   this.gender = gender,
   this.eye_color = eyeColor,
