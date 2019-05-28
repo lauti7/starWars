@@ -10,10 +10,9 @@ var countCharacters = 0;
 
 
 function peopleController() {
-  countCharacters = 0;
   var allCharactersInStorage = getCharacters('allCharacters');
   if (allCharactersInStorage.length != 0) {
-    showCharacters(allCharactersInStorage);
+    showCharacters(allCharactersInStorage, 0);
   } else {
     console.log(false);
     getData(base_url, handleRequest);
@@ -21,13 +20,7 @@ function peopleController() {
 }
 
 function handleRequest(characters){
-  showCharacters(characters.results);
-  var fetchedCharacters = [];
-  for (var i = 0; i < characters.results.length; i++) {
-    var character = new Character(countCharacters,characters.results[i].name, characters.results[i].gender, characters.results[i].eye_color, characters.results[i].height, characters.results[i].mass);
-    fetchedCharacters.push(character);
-  }
-  save('allCharacters', fetchedCharacters);
+
   if (characters.next) {
     nxtPage = characters.next;
     localStorage.setItem('nxtpage',nxtPage);
@@ -38,6 +31,30 @@ function handleRequest(characters){
     console.log(nxtPage);
     $('#load-more').attr('disabled', true);
   }
+
+  countCharacters = localStorage.getItem('countCharacters');
+
+  if (getCharacters('allCharacters')) {
+    var allCharactersInStorage = getCharacters('allCharacters');
+  } else {
+    var allCharactersInStorage = [];
+  }
+
+  for (var i = 0; i < characters.results.length; i++) {
+    countCharacters++;
+    allCharactersInStorage.push(new Character(countCharacters,characters.results[i].name, characters.results[i].gender, characters.results[i].eye_color, characters.results[i].height, characters.results[i].mass));
+  }
+
+  saveCharactersEdited(allCharactersInStorage);
+  save('countCharacters', countCharacters);
+
+  if (countCharacters > 10) {
+    showCharacters(allCharactersInStorage, countCharacters - 10);
+  } else {
+    showCharacters(allCharactersInStorage, 0);
+  }
+
+
 }
 
 //Event delegation
@@ -45,11 +62,12 @@ $('.container').on('click', '#load-more', handleLoadMoreButton);
 $('.container').on('click', '.btn-success', handleSaveButton);
 $('.container').on('click', '.btn-warning', handleRemoveButton);
 
+
 function handleSaveButton(evt){
   var $btn = $(evt.target);
   var id = $btn.parent().parent().attr('id');
   var allCharacters = getCharacters('allCharacters');
-  allCharacters[id].saved = true;
+  allCharacters[id - 1].saved = true;
   saveCharactersEdited(allCharacters);
   $btn.removeClass('btn-success');
   $btn.addClass('btn-warning');
@@ -88,11 +106,10 @@ function handleLoadMoreButton(){
 }
 
 
-function showCharacters(characters){
-  for (var i = 0; i < characters.length; i++) {
-    countCharacters++;
-    var tr = `<tr id=${countCharacters}>
-      <th scope="row">${countCharacters}</th>
+function showCharacters(characters, index){
+  for (var i = index; i < characters.length; i++) {
+    var tr = `<tr id=${characters[i].id}>
+      <th scope="row">${characters[i].id}</th>
       <td>${characters[i].name.toLowerCase()}</td>
       <td>${translateGender(characters[i].gender)}</td>
       <td>${translateEyeColor(characters[i].eye_color)}</td>
@@ -103,7 +120,6 @@ function showCharacters(characters){
     $('.tBody').append(tr);
   }
 }
-
 
 
 function translateGender(gender) {

@@ -33,25 +33,21 @@ $('.container').on('click', '.btn-danger', handleRemoveButton);
 
 function handleRemoveButton(evt){
   var $btn = $(evt.target);
-  console.log($btn);
   var id = $btn.parent().parent().attr('id');
-  console.log(id);
   var allCharacters = getCharacters('allCharacters');
-  console.log(allCharacters[id]);
-  // allCharacters[id].saved = false;
-  // saveCharactersEdited(allCharacters);
-  // $btn.parent().parent().fadeOut('slow', function(){
-  //   console.log('completed');
-  // });
-
+  allCharacters[id - 1].saved = false;
+  saveCharactersEdited(allCharacters);
+  $btn.parent().parent().fadeOut("slow", function(){
+    //
+  })
 }
 
 
 function showCharacters(characters){
   for (var i = 0; i < characters.length; i++) {
-    var tr = `<tr id=${i}>
+    var tr = `<tr id=${characters[i].id}>
       <th scope="row">${i + 1}</th>
-      <td>${characters[i].name}</td>
+      <td>${characters[i].name.toLowerCase()}</td>
       <td>${translateGender(characters[i].gender)}</td>
       <td>${translateEyeColor(characters[i].eye_color)}</td>
       <td>${translateHeight(characters[i].height)}</td>
@@ -104,9 +100,10 @@ function translateMass(mass) {
 
 function translateHeight(height) {
   if (height === 'unknown') {
-    return '?? Cm'
+    return '?? M'
   } else {
-    return height + ' Cm'
+    var fromCmToM = height / 100;
+    return fromCmToM + ' M'
   }
 }
 
