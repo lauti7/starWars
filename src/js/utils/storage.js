@@ -10,8 +10,12 @@
   }
 
   function getCharacters(key){
-    var characters = JSON.parse(localStorage.getItem(key));
-    return characters;
+    if (localStorage.getItem(key)) {
+      var characters = JSON.parse(localStorage.getItem(key));
+      return characters;
+    } else {
+      return null;
+    }
   }
 
   function save(key, c){
@@ -23,6 +27,8 @@
         var stringfiedCharacters = JSON.stringify(allCharacters);
         localStorage.setItem(key , stringfiedCharacters);
       }
+    } else {
+      localStorage.setItem(key ,JSON.stringify(c));
     }
   }
 

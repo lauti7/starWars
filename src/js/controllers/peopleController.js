@@ -3,14 +3,9 @@ import {initialStorage, getCharacters, save, saveCharactersEdited} from '../util
 import Character from '../utils/newCharacter';
 
 var base_url = 'https://swapi.co/api/people/';
-var nxtPage = localStorage.getItem('nxtpage');
-console.log(nxtPage);
-
-
-var countCharacters = 0;
+var nxtPage;
 
 function peopleController() {
-  countCharacters = 0;
   var allCharactersInStorage = getCharacters('allCharacters');
   if (allCharactersInStorage.length != 0) {
     showCharacters(allCharactersInStorage);
@@ -20,25 +15,98 @@ function peopleController() {
   }
 }
 
+var countCharacters = 0;
+
 function handleRequest(characters){
-  var fetchedCharacters = [];
-  for (var i = 0; i < characters.results.length; i++) {
-    var character = new Character(characters.results[i].name, characters.results[i].gender, characters.results[i].eye_color, characters.results[i].height, characters.results[i].mass);
-    fetchedCharacters.push(character);
-  }
-  showCharacters(characters.results);
-  save('allCharacters', fetchedCharacters);
+
   if (characters.next) {
-    localStorage.setItem('nxtpage', characters.next);
+    nxtPage = characters.next;
+    localStorage.setItem('nxtpage',nxtPage);
+  } else {
+    nxtPage = null;
+    localStorage.setItem('nxtpage', nxtPage);
+    $('#load-more').attr('disabled', true);
   }
+
+  countCharacters = localStorage.getItem('countCharacters');
+
+  if (getCharacters('allCharacters')) {
+    var allCharactersInStorage = getCharacters('allCharacters');
+  } else {
+    var allCharactersInStorage = [];
+  }
+
+  for (var i = 0; i < characters.results.length; i++) {
+    countCharacters++;
+    allCharactersInStorage.push(new Character(countCharacters,characters.results[i].name, characters.results[i].gender, characters.results[i].eye_color, characters.results[i].height, characters.results[i].mass));
+  }
+
+  saveCharactersEdited(allCharactersInStorage);
+  save('countCharacters', countCharacters);
+
+  if (countCharacters > 10) {
+    showCharacters(allCharactersInStorage, countCharacters - 10);
+  } else {
+    showCharacters(allCharactersInStorage);
+  }
+
+
 }
 
-function showCharacters(characters){
-  for (var i = 0; i < characters.length; i++) {
-    countCharacters++;
-    var tr = `<tr id=${i}>
-      <th scope="row">${countCharacters}</th>
-      <td>${characters[i].name}</td>
+//Event delegation
+$('.container').on('click', '#load-more', handleLoadMoreButton);
+$('.container').on('click', '.btn-success', handleSaveButton);
+$('.container').on('click', '.btn-warning', handleRemoveButton);
+
+
+function handleSaveButton(evt){
+  var $btn = $(evt.target);
+  var id = $btn.parent().parent().attr('id');
+  var allCharacters = getCharacters('allCharacters');
+  allCharacters[id - 1].saved = true;
+  saveCharactersEdited(allCharacters);
+  $btn.removeClass('btn-success');
+  $btn.addClass('btn-warning');
+  $btn.text('Remover');
+  // for (var i = 0; i < allCharacters.length; i++) {
+  //   if (allCharacters[i].name === characterToSave.name) {
+  //     console.log('found');
+  //     allCharacters[i].saved = true;
+  //     saveCharactersEdited(allCharacters);
+  //     break;
+  //   }
+  //}
+}
+
+function handleRemoveButton(evt){
+  var $btn = $(evt.target);
+  var id = $btn.parent().parent().attr('id');
+  var allCharacters = getCharacters('allCharacters');
+  allCharacters[id - 1].saved = false;
+  saveCharactersEdited(allCharacters);
+  $btn.removeClass('btn-warning');
+  $btn.addClass('btn-success');
+  $btn.text('Guardar');
+  // for (var i = 0; i < allCharacters.length; i++) {
+  //   if (allCharacters[i].name === characterToSave.name) {
+  //     console.log('found');
+  //     allCharacters[i].saved = false;
+  //     saveCharactersEdited(allCharacters);
+  //     break;
+  //   }
+  // }
+}
+
+function handleLoadMoreButton(){
+  getData(nxtPage, handleRequest);
+}
+
+
+function showCharacters(characters, index = 0){
+  for (var i = index; i < characters.length; i++) {
+    var tr = `<tr id=${characters[i].id}>
+      <th scope="row">${characters[i].id}</th>
+      <td>${characters[i].name.toLowerCase()}</td>
       <td>${translateGender(characters[i].gender)}</td>
       <td>${translateEyeColor(characters[i].eye_color)}</td>
       <td>${translateHeight(characters[i].height)}</td>
@@ -47,53 +115,7 @@ function showCharacters(characters){
       </tr>`;
     $('.tBody').append(tr);
   }
-  $('.btn-success').on('click', function(evt){
-    var $btn = $(evt.target);
-    $btn.removeClass('btn-success');
-    $btn.addClass('btn-warning');
-    $btn.text('Remover')
-    var id = $btn.parent().parent().attr('id');
-    var characterToSave = characters[id];
-    var allCharacters = getCharacters('allCharacters');
-    for (var i = 0; i < allCharacters.length; i++) {
-      if (allCharacters[i].name === characterToSave.name) {
-        console.log('found');
-        allCharacters[i].saved = true;
-        saveCharactersEdited(allCharacters);
-        break;
-      }
-    }
-    console.log('edited');
-  });
-  $('.btn-warning').on('click', function(evt){
-    var $btn = $(evt.target);
-    $btn.removeClass('btn-warning');
-    $btn.addClass('btn-success');
-    $btn.text('Guardar')
-    var id = $btn.parent().parent().attr('id');
-    var characterToSave = characters[id];
-    var allCharacters = getCharacters('allCharacters');
-    for (var i = 0; i < allCharacters.length; i++) {
-      if (allCharacters[i].name === characterToSave.name) {
-        console.log('found');
-        allCharacters[i].saved = false;
-        saveCharactersEdited(allCharacters);
-        break;
-      }
-    }
-    console.log('edited');
-  });
-
 }
-
-
-
-//Event delegation
-$('.container').on('click', '#load-more', function(evt){
-  console.log('clickeaste');
-  console.log(nxtPage);
-  getData(nxtPage, handleRequest);
-});
 
 function translateGender(gender) {
   if (gender === 'male') {
@@ -137,9 +159,10 @@ function translateMass(mass) {
 
 function translateHeight(height) {
   if (height === 'unknown') {
-    return '?? Cm'
+    return '?? M'
   } else {
-    return height + ' Cm'
+    var fromCmToM = height / 100;
+    return fromCmToM + ' M'
   }
 }
 
