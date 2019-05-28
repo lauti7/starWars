@@ -27,6 +27,8 @@
         var stringfiedCharacters = JSON.stringify(allCharacters);
         localStorage.setItem(key , stringfiedCharacters);
       }
+    } else {
+      localStorage.setItem(key ,JSON.stringify(c));
     }
   }
 
