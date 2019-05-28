@@ -12,7 +12,7 @@ var countCharacters = 0;
 function peopleController() {
   var allCharactersInStorage = getCharacters('allCharacters');
   if (allCharactersInStorage.length != 0) {
-    showCharacters(allCharactersInStorage, 0);
+    showCharacters(allCharactersInStorage);
   } else {
     console.log(false);
     getData(base_url, handleRequest);
@@ -51,7 +51,7 @@ function handleRequest(characters){
   if (countCharacters > 10) {
     showCharacters(allCharactersInStorage, countCharacters - 10);
   } else {
-    showCharacters(allCharactersInStorage, 0);
+    showCharacters(allCharactersInStorage);
   }
 
 
@@ -106,7 +106,7 @@ function handleLoadMoreButton(){
 }
 
 
-function showCharacters(characters, index){
+function showCharacters(characters, index = 0){
   for (var i = index; i < characters.length; i++) {
     var tr = `<tr id=${characters[i].id}>
       <th scope="row">${characters[i].id}</th>
