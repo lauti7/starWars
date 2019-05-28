@@ -4,10 +4,6 @@ import Character from '../utils/newCharacter';
 
 var base_url = 'https://swapi.co/api/people/';
 var nxtPage;
-console.log(nxtPage);
-
-var countCharacters = 0;
-
 
 function peopleController() {
   var allCharactersInStorage = getCharacters('allCharacters');
@@ -19,16 +15,16 @@ function peopleController() {
   }
 }
 
+var countCharacters = 0;
+
 function handleRequest(characters){
 
   if (characters.next) {
     nxtPage = characters.next;
     localStorage.setItem('nxtpage',nxtPage);
-    console.log(nxtPage);
   } else {
     nxtPage = null;
     localStorage.setItem('nxtpage', nxtPage);
-    console.log(nxtPage);
     $('#load-more').attr('disabled', true);
   }
 
@@ -120,7 +116,6 @@ function showCharacters(characters, index = 0){
     $('.tBody').append(tr);
   }
 }
-
 
 function translateGender(gender) {
   if (gender === 'male') {

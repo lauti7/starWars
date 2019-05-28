@@ -1,11 +1,10 @@
-import {getCharacters, save, saveCharactersEdited} from '../utils/storage';
+import {getCharacters, saveCharactersEdited} from '../utils/storage';
 
 function savedController() {
   var allCharacters = getCharacters('allCharacters');
   if (allCharacters) {
     var trueSaved = [];
     for (var i = 0; i < allCharacters.length; i++) {
-      console.log(allCharacters[i].saved);
       if (allCharacters[i].saved) {
         trueSaved.push(allCharacters[i]);
       }
