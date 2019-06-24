@@ -19,6 +19,8 @@ var countCharacters = 0;
 
 function handleRequest(characters){
 
+  console.log(characters.next);
+
   if (characters.next) {
     nxtPage = characters.next;
     localStorage.setItem('nxtpage',nxtPage);
@@ -98,7 +100,7 @@ function handleRemoveButton(evt){
 }
 
 function handleLoadMoreButton(){
-  getData(nxtPage, handleRequest);
+  getData(localStorage.getItem('nxtpage'),handleRequest);
 }
 
 

@@ -3,7 +3,7 @@ function contactController() {
 }
 
 
-$('.container').on('blur', '#email', function(){
+$('.container').on('input', '#email', function(){
   if (emailIsValid($(this).val())) {
     $(this).addClass('is-valid');
     $(this).removeClass('is-invalid');
@@ -13,7 +13,7 @@ $('.container').on('blur', '#email', function(){
   }
 });
 
-$('.container').on('blur','#name', function(){
+$('.container').on('input','#name', function(){
   if ($(this).val().length > 3) {
     $(this).addClass('is-valid');
     $(this).removeClass('is-invalid');
@@ -23,7 +23,7 @@ $('.container').on('blur','#name', function(){
   }
 });
 
-$('.container').on('blur','#comments', function(){
+$('.container').on('input','#comments', function(){
   if ($(this).val().length > 10) {
     $(this).addClass('is-valid');
     $(this).removeClass('is-invalid');
