@@ -1,4 +1,4 @@
-# Star Wars API
+# Star Wars APP
 A Vanilla JS SPA that uses Local Storage to store data from [Star Wars API](https://swapi.co/)
 
 ## QuickStar
